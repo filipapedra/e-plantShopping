@@ -4,7 +4,7 @@ import CartItem from './CartItem';
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
-
+    const [addedToCart, setAddedToCart] = useState({});  // Declare the state to track added products
     const plantsArray = [
         {
             category: "Air Purifying Plants",
@@ -232,12 +232,10 @@ function ProductList({ onHomeClick }) {
         fontSize: '30px',
         textDecoration: 'none',
     }
-
     const handleHomeClick = (e) => {
         e.preventDefault();
         onHomeClick();
     };
-
     const handleCartClick = (e) => {
         e.preventDefault();
         setShowCart(true); // Set showCart to true when cart icon is clicked
@@ -247,10 +245,20 @@ function ProductList({ onHomeClick }) {
         setShowPlants(true); // Set showAboutUs to true when "About Us" link is clicked
         setShowCart(false); // Hide the cart when navigating to About Us
     };
-
     const handleContinueShopping = (e) => {
         e.preventDefault();
         setShowCart(false);
+    };
+    const handleAddToCart = (plant) => {
+        setAddedToCart((prevState) => {
+            const newState = { ...prevState };
+            if (newState[plant.name]) {
+                newState[plant.name] += 1;  // Increase quantity if product is already in cart
+            } else {
+                newState[plant.name] = 1;  // Add product with quantity 1
+            }
+            return newState;
+        });
     };
     return (
         <div>
@@ -265,7 +273,6 @@ function ProductList({ onHomeClick }) {
                             </div>
                         </a>
                     </div>
-
                 </div>
                 <div style={styleObjUl}>
                     <div> <a href="#" onClick={(e) => handlePlantsClick(e)} style={styleA}>Plants</a></div>
@@ -274,14 +281,52 @@ function ProductList({ onHomeClick }) {
             </div>
             {!showCart ? (
                 <div className="product-grid">
-
-
-                </div>
-            ) : (
+ {plantsArray.map((category, index) => ( // Loop through each category in plantsArray
+  <div key={index}> {/* Unique key for each category div */}
+    <h1>
+      <div>{category.category}</div> {/* Display the category name */}
+    </h1>
+    <div className="product-list"> {/* Container for the list of plant cards */}
+      {category.plants.map((plant, plantIndex) => ( // Loop through each plant in the current category
+        <div className="product-card" key={plantIndex}> {/* Unique key for each plant card */}
+          <img 
+            className="product-image" 
+            src={plant.image} // Display the plant image
+            alt={plant.name} // Alt text for accessibility
+          />
+          <div className="product-title">{plant.name}</div> {/* Display plant name */}
+          {/* Display other plant details like description and cost */}
+          <div className="product-description">{plant.description}</div> {/* Display plant description */}
+          <div className="product-cost">${plant.cost}</div> {/* Display plant cost */}
+          <button
+            className="product-button"
+            onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
+          >
+            Add to Cart
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+))}
                 <CartItem onContinueShopping={handleContinueShopping} />
+        </div>
+    ): (
+        //cart view goes here
+        <div className="cart">
+      {/* Display cart content here */}
+      <h2>Your Cart</h2>
+                    <ul>
+                        {Object.keys(addedToCart).map((productName) => (
+                            <li key={productName}>
+                                {productName} - Quantity: {addedToCart[productName]}
+                            </li>
+                        ))}
+                    </ul>
+                    <button onClick={handleContinueShopping}>Continue Shopping</button>
+                </div>
             )}
         </div>
     );
 }
-
 export default ProductList;
